@@ -145,6 +145,36 @@ public class ReactNativeBiometrics extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void createSignatureWithoutPrompt(final ReadableMap params, final Promise promise) {
+        if (isCurrentSDKMarshmallowOrLater()) {
+            UiThreadUtil.runOnUiThread(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                String promptMessage = params.getString("promptMessage");
+                                String payload = params.getString("payload");
+                                String cancelButtonText = params.getString("cancelButtonText");
+                                boolean allowDeviceCredentials = params.getBoolean("allowDeviceCredentials");
+
+                                Signature signature = Signature.getInstance("SHA256withRSA");
+                                KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+                                keyStore.load(null);
+
+                                PrivateKey privateKey = (PrivateKey) keyStore.getKey(biometricKeyAlias, null);
+                                signature.initSign(privateKey);
+                                Executor executor = Executors.newSingleThreadExecutor();
+                            } catch (Exception e) {
+                                promise.reject("Error signing payload: " + e.getMessage(), "Error generating signature: " + e.getMessage());
+                            }
+                        }
+                    });
+        } else {
+            promise.reject("Cannot generate keys on android versions below 6.0", "Cannot generate keys on android versions below 6.0");
+        }
+    }
+
+    @ReactMethod
     public void createSignature(final ReadableMap params, final Promise promise) {
         if (isCurrentSDKMarshmallowOrLater()) {
             UiThreadUtil.runOnUiThread(

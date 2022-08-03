@@ -120,6 +120,11 @@ export module ReactNativeBiometricsLegacy {
     return new ReactNativeBiometrics().createSignature(createSignatureOptions)
   }
 
+  export function createSignatureWithoutPrompt(createSignatureOptions: CreateSignatureOptions): Promise<CreateSignatureResult> {
+    return new ReactNativeBiometrics().createSignatureWithoutPrompt(createSignatureOptions)
+  }
+
+
   /**
    * Prompts user with biometrics dialog using the passed in prompt message and
    * returns promise that resolves to an object with object.success = true if the user passes,
@@ -195,6 +200,25 @@ export default class ReactNativeBiometrics {
      * @returns {Promise<Object>}  Promise that resolves to an object cryptographic signature details
      */
     createSignature(createSignatureOptions: CreateSignatureOptions): Promise<CreateSignatureResult> {
+      createSignatureOptions.cancelButtonText = createSignatureOptions.cancelButtonText ?? 'Cancel'
+
+      return bridge.createSignature({
+        allowDeviceCredentials: this.allowDeviceCredentials,
+        ...createSignatureOptions
+      })
+    }
+
+
+    /**
+     * Prompts user with biometrics dialog using the passed in prompt message and
+     * returns promise that resolves to an object with object.signature,
+     * which is cryptographic signature of the payload
+     * @param {Object} createSignatureOptions
+     * @param {string} createSignatureOptions.promptMessage
+     * @param {string} createSignatureOptions.payload
+     * @returns {Promise<Object>}  Promise that resolves to an object cryptographic signature details
+     */
+     createSignatureWithoutPrompt(createSignatureOptions: CreateSignatureOptions): Promise<CreateSignatureResult> {
       createSignatureOptions.cancelButtonText = createSignatureOptions.cancelButtonText ?? 'Cancel'
 
       return bridge.createSignature({
